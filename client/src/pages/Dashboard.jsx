@@ -13,16 +13,19 @@ import EditIcon from '@mui/icons-material/Edit'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../providers/AuthProvider.jsx'
 
+
 export default function Dashboard() {
   const { api } = useAuth()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [events, setEvents] = useState(null)
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     api.get('/api/events').then(r => setEvents(r.data)).catch(() => setEvents([]))
   }, [])
 
+  
   const stats = useMemo(() => {
     if (!events) return { total: 0, participants: 0, upcoming: 0, past: 0 }
     const now = Date.now()
@@ -73,6 +76,8 @@ export default function Dashboard() {
                 </Typography>
               </Stack>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+
+                { (user?.role === "organization" || user?.permissions?.canCreateEvents) && (
                 <Button
                   variant="contained"
                   size="large"
@@ -94,10 +99,11 @@ export default function Dashboard() {
                       boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
                     }
                   }}
+                
                 >
                   Create Event
                 </Button>
-
+                )}
                 {user?.role === "organization" && (
                   <Button
                     variant="contained"
@@ -143,9 +149,9 @@ export default function Dashboard() {
           <Fade in timeout={800}>
             <Box>
               <Grid container spacing={2} sx={{ mb: 5 }}>
-                <Grid xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3} display="flex">
                   <Zoom in timeout={400}>
-                    <div>
+                    <div style={{ width: '100%' }}>
                       <StatCard
                         icon={<TimelineIcon />}
                         label="Total Events"
@@ -156,9 +162,9 @@ export default function Dashboard() {
                     </div>
                   </Zoom>
                 </Grid>
-                <Grid xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3} display="flex">
                   <Zoom in timeout={500}>
-                    <div>
+                    <div style={{ width: '100%' }}>
                       <StatCard
                         icon={<PeopleAltIcon />}
                         label="Participants"
@@ -169,9 +175,9 @@ export default function Dashboard() {
                     </div>
                   </Zoom>
                 </Grid>
-                <Grid xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3} display="flex">
                   <Zoom in timeout={600}>
-                    <div>
+                    <div style={{ width: '100%' }}>
                       <StatCard
                         icon={<EventAvailableIcon />}
                         label="Upcoming"
@@ -182,9 +188,9 @@ export default function Dashboard() {
                     </div>
                   </Zoom>
                 </Grid>
-                <Grid xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3} display="flex">
                   <Zoom in timeout={700}>
-                    <div>
+                    <div style={{ width: '100%' }}>
                       <StatCard
                         icon={<RoomIcon />}
                         label="Past Events"
@@ -206,7 +212,7 @@ export default function Dashboard() {
                 </Stack>
                 <Grid container spacing={3}>
                   {events.slice(0, 6).map((e, idx) => (
-                    <Grid xs={12} md={6} key={e._id}>
+                    <Grid item xs={12} md={6} key={e._id}>
                       <Grow in timeout={800 + idx * 100}>
                         <Card
                           sx={{
@@ -308,7 +314,7 @@ export default function Dashboard() {
                               size="small"
                               startIcon={<EditIcon />}
                               component={Link}
-                              to="/admin/events"
+                              to="/events"
                               sx={{
                                 color: '#f5576c',
                                 fontWeight: 600,

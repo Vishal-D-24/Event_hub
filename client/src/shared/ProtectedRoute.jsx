@@ -1,29 +1,39 @@
-import { Outlet, Navigate } from 'react-router-dom'
-import { useAuth } from '../providers/AuthProvider.jsx'
-import { LinearProgress, Box } from '@mui/material'
+import { Outlet, Navigate } from "react-router-dom";
+import { useAuth } from "../providers/AuthProvider.jsx";
+import { LinearProgress, Box } from "@mui/material";
 
-export default function ProtectedRoute() {
-  const { user, loading } = useAuth()
+export default function ProtectedRoute({ allowedRole }) {
+  const { user, loading } = useAuth();
 
-  // Still checking session → show loader
+  // Still checking session
   if (loading) {
     return (
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ width: "100%" }}>
         <LinearProgress />
       </Box>
-    )
+    );
   }
 
-  // Not logged in → redirect to correct login
+  // User not logged in → redirect based on which role is required
   if (!user) {
-    return <Navigate to="/organization/login" replace />
+    const loginPath =
+      allowedRole === "event-manager"
+        ? "/event-manager/login"
+        : "/organization/login";
+
+    return <Navigate to={loginPath} replace />;
   }
 
-  // Allow both organization & event managers
-  if (user.role === 'organization' || user.role === 'eventManager') {
-    return <Outlet />
+  // User logged in but role doesn't match → block access
+  if (allowedRole && user.role !== allowedRole) {
+    const correctDashboard =
+      user.role === "event-manager"
+        ? "/event-manager/dashboard"
+        : "/organization/dashboard";
+
+    return <Navigate to={correctDashboard} replace />;
   }
 
-  // Anything else → fallback
-  return <Navigate to="/organization/login" replace />
+  // All good → allow access to route
+  return <Outlet />;
 }

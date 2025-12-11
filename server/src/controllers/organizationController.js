@@ -130,6 +130,7 @@ export async function createEventManager(req, res, next) {
           <p>Hi ${name},</p>
           <p>You have been added as an Event Manager for <strong>${req.user.organizationName}</strong>.</p>
           <p><strong>Login Email:</strong> ${email}</p>
+          <p><strong>Password:</strong> ${password}</p>
           <p><a href="${process.env.FRONTEND_URL}/event-manager/login" style="padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px;">Login Now</a></p>
         </div>
       </div>

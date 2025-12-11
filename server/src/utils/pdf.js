@@ -27,7 +27,7 @@ export function generateCertificateBuffer({ participantName, event, templatePath
         .font("Helvetica-Bold")
         .fontSize(42)
         .fillColor("#000000")
-        .text(participantName, 0, 270, {
+        .text(participantName, 0, 250, {
           align: "center",
         });
 
@@ -36,7 +36,7 @@ export function generateCertificateBuffer({ participantName, event, templatePath
         .font("Helvetica")
         .fontSize(20)
         .fillColor("#444")
-        .text(`for participating in ${event.title}`, 0, 330, {
+        .text(`for participating in ${event.title}`, 0, 305, {
           align: "center",
         });
 
@@ -51,7 +51,7 @@ export function generateCertificateBuffer({ participantName, event, templatePath
         .font("Helvetica")
         .fontSize(14)
         .fillColor("#666")
-        .text(`Issued on: ${formattedDate}`, 0, 360, {
+        .text(`Issued on: ${formattedDate}`, 0, 340, {
           align: "center",
         });
 

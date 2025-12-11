@@ -15,6 +15,7 @@ import { useAuth } from '../providers/AuthProvider.jsx'
 
 export default function Events() {
   const { api } = useAuth()
+  const { user } = useAuth()
   const [events, setEvents] = useState(null)
   const [error, setError] = useState('')
   const [open, setOpen] = useState(false)
@@ -108,6 +109,7 @@ export default function Events() {
                   Create and manage your events
                 </Typography>
               </Stack>
+              { (user?.role === "organization" || user?.permissions?.canCreateEvents) && (
               <Button
                 variant="contained"
                 size="large"
@@ -131,6 +133,7 @@ export default function Events() {
               >
                 New Event
               </Button>
+              )}
             </Stack>
           </Fade>
         </Container>

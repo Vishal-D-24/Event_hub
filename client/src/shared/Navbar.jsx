@@ -68,7 +68,7 @@ export default function Navbar() {
                 <Button
                   color="inherit"
                   component={NavLink}
-                  to="/admin/dashboard"
+                  to="/dashboard"
                   sx={{
                     fontWeight: 600,
                     '&.active': {
@@ -112,7 +112,7 @@ export default function Navbar() {
                 <Button
                   color="inherit"
                   component={NavLink}
-                  to="/admin/login"
+                  to="/organization/login"
                   sx={{
                     fontWeight: 600,
                     '&.active': {
@@ -125,7 +125,7 @@ export default function Navbar() {
                 <Button
                   variant="contained"
                   component={NavLink}
-                  to="/admin/signup"
+                  to="/organization/signup"
                   sx={{
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     fontWeight: 600,

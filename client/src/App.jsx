@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import Navbar from './shared/Navbar.jsx'
 import Footer from './shared/Footer.jsx'
 import Landing from './pages/Landing.jsx'
@@ -27,26 +27,20 @@ export default function App() {
         {/* Event Manager Routes */}
         <Route path="/event-manager/login" element={<EventManagerLogin />} />
         
-        {/* Legacy Admin Routes (redirect to organization) */}
-        <Route path="/admin/login" element={<Navigate to="/organization/login" replace />} />
-        <Route path="/admin/signup" element={<Navigate to="/organization/signup" replace />} />
-
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/admin/dashboard" element={<Navigate to="/dashboard" replace />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/admin/events" element={<Navigate to="/events" replace />} />
           <Route path="/event-managers" element={<EventManagers />} />
           <Route path="/events/:id/participants" element={<Participants />} />
-          <Route path="/admin/events/:id/participants" element={<Navigate to="/events/:id/participants" replace />} />
           <Route path="/designer" element={<Designer />} />
         </Route>
 
         {/* Public Registration */}
         <Route path="/register/:shareId" element={<Register />} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Fallback for unknown routes */}
+        <Route path="*" element={<Landing />} />
       </Routes>
       <Footer />
     </>

@@ -1,30 +1,15 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import {
-  Container,
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Switch,
-  FormControlLabel,
-  FormGroup,
-  Alert,
-  Chip,
-  IconButton,
+  Container, Box, Typography, Button, Card, CardContent, Grid, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, TextField, Switch, FormControlLabel, FormGroup, Alert, Chip, IconButton,
+
 } from "@mui/material";
-import { Add, Edit, Delete } from "@mui/icons-material";
+import { Add, Edit, Delete, Visibility, VisibilityOff, LockOutlined} from "@mui/icons-material";
 
 export default function EventManagers() {
   const { api, user } = useAuth();
   const [managers, setManagers] = useState([]);
+  const [showPassword, setShowPassword] = useState(false)
   const [openDialog, setOpenDialog] = useState(false);
   const [editingManager, setEditingManager] = useState(null);
   const [formData, setFormData] = useState({
@@ -33,8 +18,8 @@ export default function EventManagers() {
     name: "",
     phone: "",
     permissions: {
-      canCreateEvents: true,
-      canEditEvents: true,
+      canCreateEvents: false,
+      canEditEvents: false,
       canDeleteEvents: false,
       canManageRegistrations: true,
       canGenerateCertificates: true,
@@ -77,8 +62,8 @@ export default function EventManagers() {
         name: "",
         phone: "",
         permissions: {
-          canCreateEvents: true,
-          canEditEvents: true,
+          canCreateEvents: false,
+          canEditEvents: false,
           canDeleteEvents: false,
           canManageRegistrations: true,
           canGenerateCertificates: true,
@@ -289,174 +274,192 @@ export default function EventManagers() {
 
       {/* ---------- Dialog ---------- */}
       {/* ---------- Dialog ---------- */}
-<Dialog
-  open={openDialog}
-  onClose={handleCloseDialog}
-  maxWidth="sm"
-  fullWidth
-  PaperProps={{
-    sx: {
-      borderRadius: "20px",
-      backdropFilter: "blur(12px)",
-      background: "rgba(255,255,255,0.75)",
-      border: "1px solid rgba(255,255,255,0.4)",
-      boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-      p: 1,
-    },
-  }}
-  TransitionProps={{
-    onEntering: () => {},
-  }}
->
-  <DialogTitle
-    sx={{
-      fontWeight: "bold",
-      fontSize: "1.5rem",
-      pb: 1,
-      borderBottom: "1px solid rgba(0,0,0,0.08)",
-      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      color: "white",
-      borderTopLeftRadius: "20px",
-      borderTopRightRadius: "20px",
-    }}
-  >
-    {editingManager ? "Edit Event Manager" : "Add Event Manager"}
-  </DialogTitle>
-
-  <DialogContent sx={{ mt: 2 }}>
-    {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
-    {/* Name */}
-    <TextField
-      fullWidth
-      label="Full Name"
-      value={formData.name}
-      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-      margin="normal"
-      required
-      sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
-    />
-
-    {/* Email */}
-    <TextField
-      fullWidth
-      label="Email Address"
-      type="email"
-      value={formData.email}
-      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-      margin="normal"
-      required
-      disabled={!!editingManager}
-      sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
-    />
-
-    {/* Password only when creating */}
-    {!editingManager && (
-      <TextField
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
         fullWidth
-        label="Password"
-        type="password"
-        value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        margin="normal"
-        required
-        sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
-      />
-    )}
+        PaperProps={{
+          sx: {
+            borderRadius: "20px",
+            backdropFilter: "blur(12px)",
+            background: "rgba(255,255,255,0.75)",
+            border: "1px solid rgba(255,255,255,0.4)",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+            p: 1,
+          },
+        }}
+        TransitionProps={{
+          onEntering: () => { },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+            pb: 1,
+            borderBottom: "1px solid rgba(0,0,0,0.08)",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            borderTopLeftRadius: "20px",
+            borderTopRightRadius: "20px",
+          }}
+        >
+          {editingManager ? "Edit Event Manager" : "Add Event Manager"}
+        </DialogTitle>
 
-    {/* Phone */}
-    <TextField
-      fullWidth
-      label="Phone Number"
-      value={formData.phone}
-      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-      margin="normal"
-      sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
-    />
+        <DialogContent sx={{ mt: 2 }}>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-    {/* Permissions Heading */}
-    <Box
-      sx={{
-        mt: 4,
-        mb: 1,
-        fontWeight: "bold",
-        fontSize: "1.1rem",
-        color: "#333",
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-      }}
-    >
-      Permissions
-    </Box>
-
-    <Box
-      sx={{
-        p: 2,
-        borderRadius: "14px",
-        border: "1px solid rgba(0,0,0,0.08)",
-        background: "rgba(255,255,255,0.7)",
-      }}
-    >
-      <FormGroup>
-        {Object.keys(formData.permissions).map((key) => (
-          <FormControlLabel
-            key={key}
-            control={
-              <Switch
-                checked={formData.permissions[key]}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    permissions: {
-                      ...formData.permissions,
-                      [key]: e.target.checked,
-                    },
-                  })
-                }
-                sx={{
-                  "& .MuiSwitch-switchBase.Mui-checked": {
-                    color: "#764ba2",
-                  },
-                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                    backgroundColor: "#764ba2",
-                  },
-                }}
-              />
-            }
-            label={key.replace(/([A-Z])/g, " $1")}
+          {/* Name */}
+          <TextField
+            fullWidth
+            label="Full Name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            margin="normal"
+            required
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
           />
-        ))}
-      </FormGroup>
-    </Box>
-  </DialogContent>
 
-  <DialogActions sx={{ p: 2 }}>
-    <Button
-      onClick={handleCloseDialog}
-      sx={{
-        textTransform: "none",
-        borderRadius: "10px",
-      }}
-    >
-      Cancel
-    </Button>
+          {/* Email */}
+          <TextField
+            fullWidth
+            label="Email Address"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            margin="normal"
+            required
+            disabled={!!editingManager}
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
+          />
 
-    <Button
-      onClick={handleSubmit}
-      variant="contained"
-      disabled={loading}
-      sx={{
-        textTransform: "none",
-        borderRadius: "10px",
-        px: 3,
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      }}
-    >
-      {editingManager ? "Update" : "Create"}
-    </Button>
-  </DialogActions>
-</Dialog>
+          {/* Password only when creating */}
+          {!editingManager && (
+            <TextField
+              fullWidth
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              margin="normal"
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined sx={{ color: 'action.active' }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      sx={{ transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.1)' } }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
+            />
+          )}
+
+          {/* Phone */}
+          <TextField
+            fullWidth
+            label="Phone Number"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            margin="normal"
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
+          />
+
+          {/* Permissions Heading */}
+          <Box
+            sx={{
+              mt: 4,
+              mb: 1,
+              fontWeight: "bold",
+              fontSize: "1.1rem",
+              color: "#333",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            Permissions
+          </Box>
+
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: "14px",
+              border: "1px solid rgba(0,0,0,0.08)",
+              background: "rgba(255,255,255,0.7)",
+            }}
+          >
+            <FormGroup>
+              {Object.keys(formData.permissions).map((key) => (
+                <FormControlLabel
+                  key={key}
+                  control={
+                    <Switch
+                      checked={formData.permissions[key]}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          permissions: {
+                            ...formData.permissions,
+                            [key]: e.target.checked,
+                          },
+                        })
+                      }
+                      sx={{
+                        "& .MuiSwitch-switchBase.Mui-checked": {
+                          color: "#764ba2",
+                        },
+                        "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                          backgroundColor: "#764ba2",
+                        },
+                      }}
+                    />
+                  }
+                  label={key.replace(/([A-Z])/g, " $1")}
+                />
+              ))}
+            </FormGroup>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={handleCloseDialog}
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            disabled={loading}
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              px: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            }}
+          >
+            {editingManager ? "Update" : "Create"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </div>
   );

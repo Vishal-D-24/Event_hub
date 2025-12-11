@@ -106,7 +106,7 @@ export default function Landing() {
                   variant="contained"
                   size="large"
                   component={Link}
-                  to="/admin/signup"
+                  to="/signup"
                   sx={{
                     bgcolor: 'white',
                     color: '#667eea',
@@ -284,7 +284,7 @@ export default function Landing() {
                   variant="contained"
                   size="large"
                   component={Link}
-                  to="/admin/signup"
+                  to="/signup"
                   sx={{
                     bgcolor: 'white',
                     color: '#667eea',
