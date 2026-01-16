@@ -457,13 +457,13 @@ export default function Events() {
               >
                 <Typography variant="caption" display="block" sx={{ mb: 1 }}>
                   <strong>Tip:</strong> Design your certificate in Canva and export it as <strong>PNG (Landscape)</strong>.
-                  Make sure your <strong>signature</strong> has a transparent background (PNG).
                   You can also <strong>download our certificate template</strong> and use it directly — ensure you leave
                   clear space for:
                   <br />• Participant Name
                   <br />• Event Name
                   <br />• Date
-                  <br />• Coordinator Signature Area
+                  <br />• If you wish to include signatures on the certificate, add them directly in your design.
+                  <br />• The system will not overlay signatures; it only fills in participant details.
                   This allows the system to auto-place participant information correctly.
                 </Typography>
 
