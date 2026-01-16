@@ -106,7 +106,7 @@ export default function Landing() {
                   variant="contained"
                   size="large"
                   component={Link}
-                  to="/signup"
+                  to="/organization/signup"
                   sx={{
                     bgcolor: 'white',
                     color: '#667eea',
@@ -284,7 +284,7 @@ export default function Landing() {
                   variant="contained"
                   size="large"
                   component={Link}
-                  to="/signup"
+                  to="/organization/signup"
                   sx={{
                     bgcolor: 'white',
                     color: '#667eea',
@@ -322,7 +322,7 @@ export default function Landing() {
               For support, email us at{' '}
               <Typography
                 component="a"
-                href="mailto:support@smarteventhub.dev"
+                href="mailto:smarteventhub381@gmail.com"
                 sx={{
                   color: '#667eea',
                   fontWeight: 600,
@@ -332,7 +332,7 @@ export default function Landing() {
                   }
                 }}
               >
-                support@smarteventhub.dev
+                smarteventhub381@gmail.com
               </Typography>
             </Typography>
           </Stack>
