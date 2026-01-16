@@ -1,4 +1,4 @@
-import path from 'path';
+
 import Event from '../models/Event.js';
 import Participant from '../models/Participant.js';
 import { nanoid } from 'nanoid';
@@ -33,19 +33,41 @@ export async function listEvents(req, res, next) {
 }
 
 export async function createEvent(req, res, next) {
+  const startTime = Date.now();
   try {
     const { title, description, category, mode, startDateTime, endDateTime, location, customFields } = req.body;
-    if (!title || !mode || !startDateTime || !endDateTime) return res.status(400).json({ error: 'Missing fields' });
+    
+    // Log request for debugging
+    console.log('📝 Create Event Request:', {
+      body: { title, description, category, mode, startDateTime, endDateTime, location },
+      userId: req.user?._id,
+      userRole: req.userRole,
+      filesReceived: Object.keys(req.files || {})
+    });
+    
+    if (!title || !mode || !startDateTime || !endDateTime) {
+      return res.status(400).json({ error: 'Missing required fields: title, mode, startDateTime, endDateTime' });
+    }
 
     const shareId = nanoid(10);
-    const posterPath = req.files?.poster?.[0]?.path;
-    const certTemplatePath = req.files?.certTemplate?.[0]?.path;
-    const signaturePath = req.files?.signature?.[0]?.path;
 
-    // Get organization ID based on user role
-    const organizationId = req.userRole === 'organization' ? req.user._id : req.user.organization._id || req.user.organization;
+    // ✅ Cloudinary URLs (these are populated by multer-storage-cloudinary during upload)
+    console.log('⏱️ File upload took:', Date.now() - startTime, 'ms');
+    
+    // Extract Cloudinary URLs - use secure_url for HTTPS
+    const posterUrl = req.files?.poster?.[0]?.secure_url || null;
+    const certTemplateUrl = req.files?.certTemplate?.[0]?.secure_url || null;
+    const signatureUrl = req.files?.signature?.[0]?.secure_url || null;
+    console.log('📤 File URLs extracted:', { posterUrl, certTemplateUrl, signatureUrl });
+
+    const organizationId =
+      req.userRole === 'organization'
+        ? req.user._id
+        : req.user.organization._id || req.user.organization;
+
     const createdByModel = req.userRole === 'organization' ? 'Organization' : 'EventManager';
 
+    const dbStartTime = Date.now();
     const event = await Event.create({
       title,
       description,
@@ -54,9 +76,9 @@ export async function createEvent(req, res, next) {
       startDateTime: new Date(startDateTime),
       endDateTime: new Date(endDateTime),
       location,
-      posterPath,
-      certTemplatePath,
-      signaturePath,
+      posterUrl,
+      certTemplateUrl,
+      signatureUrl,
       customFields: customFields ? JSON.parse(customFields) : [],
       shareId,
       registrationLink: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/register/${shareId}`,
@@ -65,11 +87,18 @@ export async function createEvent(req, res, next) {
       createdByModel,
     });
 
+    const totalTime = Date.now() - startTime;
+    const dbTime = Date.now() - dbStartTime;
+    console.log('✅ Event created successfully:', event._id);
+    console.log(`⏱️ Timing: Total ${totalTime}ms (DB: ${dbTime}ms, Upload: ${dbStartTime - startTime}ms)`);
+    
     res.json(event);
   } catch (e) {
+    console.error('❌ Create Event Error:', e.message, e.stack);
     next(e);
   }
 }
+
 
 export async function getEvent(req, res, next) {
   try {
@@ -85,26 +114,35 @@ export async function getEvent(req, res, next) {
 
 export async function updateEvent(req, res, next) {
   try {
-    const update = { ...req.body };
+    const update = {};
+    Object.assign(update, req.body);
+
     if (update.startDateTime) update.startDateTime = new Date(update.startDateTime);
     if (update.endDateTime) update.endDateTime = new Date(update.endDateTime);
 
-    if (req.files?.poster?.[0]) update.posterPath = req.files.poster[0].path;
-    if (req.files?.certTemplate?.[0]) update.certTemplatePath = req.files.certTemplate[0].path;
-    if (req.files?.signature?.[0]) update.signaturePath = req.files.signature[0].path;
+    if (req.files?.poster?.[0]) update.posterUrl = req.files.poster[0].path;
+    if (req.files?.certTemplate?.[0]) update.certTemplateUrl = req.files.certTemplate[0].path;
+    if (req.files?.signature?.[0]) update.signatureUrl = req.files.signature[0].path;
 
-    const organizationId = req.userRole === 'organization' ? req.user._id : req.user.organization._id || req.user.organization;
+    const organizationId =
+      req.userRole === 'organization'
+        ? req.user._id
+        : req.user.organization._id || req.user.organization;
+
     const event = await Event.findOneAndUpdate(
       { _id: req.params.id, organization: organizationId },
       update,
       { new: true }
     );
+
     if (!event) return res.status(404).json({ error: 'Not found' });
+
     res.json(event);
   } catch (e) {
     next(e);
   }
 }
+
 
 export async function deleteEvent(req, res, next) {
   try {

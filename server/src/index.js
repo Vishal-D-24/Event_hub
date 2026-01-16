@@ -1,4 +1,6 @@
-import dotenv from 'dotenv';
+// ✅ MUST load env vars before any other imports
+import 'dotenv/config.js';
+
 import express from 'express';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
@@ -18,8 +20,6 @@ import participantRoutes from './routes/participants.js';
 import certificateRoutes from './routes/certificates.js';
 import testRoutes from './routes/test.js';
 import { startScheduler } from './jobs/scheduler.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

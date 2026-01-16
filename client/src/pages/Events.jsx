@@ -19,6 +19,7 @@ export default function Events() {
   const [events, setEvents] = useState(null)
   const [error, setError] = useState('')
   const [open, setOpen] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
   const [shareDialog, setShareDialog] = useState({ open: false, link: '' })
   const [form, setForm] = useState({ title: '', description: '', category: 'Other', mode: 'online', startDateTime: '', endDateTime: '', location: '' })
   const [files, setFiles] = useState({ certTemplate: null, signature: null })
@@ -27,22 +28,127 @@ export default function Events() {
   const load = () => api.get('/api/events').then(r => setEvents(r.data)).catch(() => setEvents([]))
   useEffect(() => { load() }, [])
 
+  // Client-side validation
+  const validateForm = () => {
+    // Title is required
+    if (!form.title?.trim()) {
+      setError('Event title is required')
+      return false
+    }
+
+    // Start date/time required and valid
+    if (!form.startDateTime) {
+      setError('Start date and time are required')
+      return false
+    }
+
+    // End date/time required and valid
+    if (!form.endDateTime) {
+      setError('End date and time are required')
+      return false
+    }
+
+    // Start must be before end
+    const startTime = new Date(form.startDateTime).getTime()
+    const endTime = new Date(form.endDateTime).getTime()
+    if (startTime >= endTime) {
+      setError('Event end time must be after start time')
+      return false
+    }
+
+    // Location required for offline events
+    if (form.mode === 'offline' && !form.location?.trim()) {
+      setError('Location is required for offline events')
+      return false
+    }
+
+    return true
+  }
+
   const create = async () => {
     setError('')
+
+    // Validate before submission
+    if (!validateForm()) {
+      return
+    }
+
+    setIsCreating(true)
+    const startTime = Date.now()
+
     try {
-      const fd = new FormData()
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v))
-      fd.append('customFields', JSON.stringify(customFields))
-      if (files.certTemplate) fd.append('certTemplate', files.certTemplate)
-      if (files.signature) fd.append('signature', files.signature)
-      await api.post('/api/events', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      // Create FormData - browser will set correct multipart/form-data header
+      const formData = new FormData()
+
+      // Append text fields
+      formData.append('title', form.title.trim())
+      formData.append('description', form.description.trim())
+      formData.append('category', form.category)
+      formData.append('mode', form.mode)
+      formData.append('startDateTime', form.startDateTime)
+      formData.append('endDateTime', form.endDateTime)
+      formData.append('location', form.location.trim())
+
+      // Append customFields as JSON string
+      formData.append('customFields', JSON.stringify(customFields))
+
+      // Append files only if selected (backend determines paths via Cloudinary)
+      if (files.certTemplate) {
+        formData.append('certTemplate', files.certTemplate)
+      }
+      if (files.signature) {
+        formData.append('signature', files.signature)
+      }
+
+      // POST without manually setting Content-Type header
+      // Browser will automatically set it to multipart/form-data with correct boundary
+      const response = await api.post('/api/events', formData)
+
+      const duration = Date.now() - startTime
+      console.log(`✅ Event created in ${duration}ms`)
+
+      // Success - reset form and close dialog
       setOpen(false)
-      setForm({ title: '', description: '', category: 'Other', mode: 'online', startDateTime: '', endDateTime: '', location: '' })
+      setForm({
+        title: '',
+        description: '',
+        category: 'Other',
+        mode: 'online',
+        startDateTime: '',
+        endDateTime: '',
+        location: ''
+      })
       setFiles({ certTemplate: null, signature: null })
       setCustomFields([])
       load()
     } catch (e) {
-      setError(e.response?.data?.error || 'Failed to create')
+      console.error('Event creation error:', {
+        status: e.response?.status,
+        data: e.response?.data,
+        message: e.message,
+        isNetwork: e.code === 'ERR_NETWORK'
+      })
+      
+      // Provide detailed error messages
+      let errorMsg = 'Failed to create event'
+      
+      if (e.code === 'ERR_NETWORK') {
+        errorMsg = 'Network error: Cannot reach server. Make sure the backend is running on port 5000'
+      } else if (e.response?.status === 401) {
+        errorMsg = 'Session expired. Please log in again'
+      } else if (e.response?.status === 403) {
+        errorMsg = 'You do not have permission to create events'
+      } else if (e.response?.data?.message) {
+        errorMsg = e.response.data.message
+      } else if (e.response?.data?.error) {
+        errorMsg = e.response.data.error
+      } else if (e.message) {
+        errorMsg = e.message
+      }
+      
+      setError(errorMsg)
+    } finally {
+      setIsCreating(false)
     }
   }
 
@@ -595,6 +701,7 @@ export default function Events() {
           <Button
             variant="contained"
             onClick={create}
+            disabled={isCreating}
             size="large"
             sx={{
               borderRadius: 2,
@@ -605,10 +712,14 @@ export default function Events() {
               '&:hover': {
                 background: 'linear-gradient(135deg, #5568d3 0%, #6a3f91 100%)',
                 boxShadow: '0 6px 20px rgba(102, 126, 234, 0.5)'
+              },
+              '&:disabled': {
+                opacity: 0.7,
+                cursor: 'not-allowed'
               }
             }}
           >
-            Create Event
+            {isCreating ? '⏳ Creating...' : 'Create Event'}
           </Button>
         </DialogActions>
       </Dialog>
